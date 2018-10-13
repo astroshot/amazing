@@ -3,8 +3,7 @@
 
 from __future__ import absolute_import
 
-import string
-import urllib
+from urllib import parse
 
 
 def make_url(domain, uri, uri_prefix='', protocol='http'):
@@ -16,10 +15,10 @@ def make_url(domain, uri, uri_prefix='', protocol='http'):
     :param protocol:
     :return:
     """
-    domain = string.rstrip(domain, '/')
-    uri = '/' + string.lstrip(uri, '/')
+    domain = domain.rstrip('/')
+    uri = '/' + uri.lstrip('/')
     if uri_prefix:
-        uri_prefix = '/' + string.strip(uri_prefix, '/')
+        uri_prefix = '/' + uri_prefix.strip('/')
 
     return '{protocol}://{domain}{uri_prefix}{uri}'.format(
         protocol=protocol, domain=domain, uri_prefix=uri_prefix, uri=uri
@@ -36,4 +35,4 @@ def gen_uri(path, query_arguments=None):
     if not query_arguments:
         return path
 
-    return '{path}?{query}'.format(path=path, query=urllib.urlencode(query_arguments, doseq=True))
+    return '{path}?{query}'.format(path=path, query=parse.urlencode(query_arguments, doseq=True))
