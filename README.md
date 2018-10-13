@@ -1,3 +1,3 @@
 # amazing
 
-Simple demo for web project of Python3 using buildout.
+Web project template of Python3 using tornado and built with buildout.
