@@ -5,6 +5,7 @@ decorator
 ipython
 ipython-genutils
 jedi
+mysqlclient
 parso
 pexpect
 pickleshare
@@ -13,6 +14,9 @@ ptyprocess
 Pygments
 simplegeneric
 six
+SQLAlchemy
+toml
 tornado
 traitlets
 wcwidth
+zc.buildout
