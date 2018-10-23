@@ -1,7 +1,9 @@
 # coding=utf-8
 from itertools import cycle
 
+import logging
 import threading
+from contextlib import contextmanager
 from functools import wraps
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -74,41 +76,39 @@ def use_session(func=None, master=False, auto_commit=False, auto_flush=False):
     def wrap(func):
         @wraps(func)
         def inner(*args, **kwargs):
-            if isinstance(args[0], object):
-                pre_session = None
-                is_injected = False
-                session = None
-                global_session = getattr(_g, _inject_attr_name, None)
+            pre_session = None
+            is_injected = False
+            session = None
+            global_session = getattr(_g, _inject_attr_name, None)
 
-                if hasattr(args[0], _inject_attr_name):  # session has been injected
-                    is_injected = True
-                    pre_session = getattr(args[0], _inject_attr_name, None)
+            if hasattr(args[0], _inject_attr_name):  # session has been injected
+                is_injected = True
+                pre_session = getattr(args[0], _inject_attr_name, None)
 
-                    if pre_session.bind == mysql_master and global_session is None:
-                        session = pre_session
+                if pre_session.bind == mysql_master and global_session is None:
+                    session = pre_session
 
-                if session is None:
-                    session = global_session or get_session(master, auto_commit, auto_flush)
-                    setattr(args[0], _inject_attr_name, session)
+            if session is None:
+                session = global_session or get_session(master, auto_commit, auto_flush)
+                setattr(args[0], _inject_attr_name, session)
 
-                transaction = session.begin(True) if global_session else session.transaction
+            transaction = session.begin(True) if global_session else session.transaction
 
-                try:
-                    result = func(*args, **kwargs)
-                    result = _format_obj_dict(args[0], result)
-                    if session.bind == mysql_master and transaction.is_active:
-                        transaction.commit()
-                except Exception as e:
-                    raise e
-                finally:
-                    if is_injected:
-                        setattr(args[0], _inject_attr_name, pre_session)
-                    else:
-                        delattr(args[0], _inject_attr_name)
-                    if not global_session:
-                        session.close()
-                return result
-            return func(*args, **kwargs)
+            try:
+                result = func(*args, **kwargs)
+                result = _format_obj_dict(args[0], result)
+                if session.bind == mysql_master and transaction.is_active:
+                    transaction.commit()
+            except Exception as e:
+                raise e
+            finally:
+                if is_injected:
+                    setattr(args[0], _inject_attr_name, pre_session)
+                else:
+                    delattr(args[0], _inject_attr_name)
+                if not global_session:
+                    session.close()
+            return result
 
         return inner
 
@@ -116,3 +116,62 @@ def use_session(func=None, master=False, auto_commit=False, auto_flush=False):
         return wrap
     else:
         return wrap(func)
+
+
+@contextmanager
+def using_master():
+    """
+    `using_master` decorator forces `get_session` and `use_session` bind to master database
+    >>> with using_master:
+    >>>     session = get_session()
+    >>>     session.query(...)
+    """
+    _old = None
+
+    try:
+        _old = getattr(_g, 'using_master', None)
+        _g.using_master = True
+        logging.debug('using master...')
+        yield
+    finally:
+        if _old is None:
+            del _g.using_master
+        else:
+            _g.using_master = _old
+        del _old
+        logging.debug('end using master...')
+
+
+@contextmanager
+def using_global_transaction():
+    """
+    `using_global_transaction` decorator forces `get_session` returns Master `session(master=True)`,
+    and ignore config in `use_session`
+    used to construct transaction
+    >>> from app.dao.user import UserDAO
+    >>> with using_global_transaction() as session:
+    >>>     try:
+    >>>         UserDAO.add(name='name', phone_no='+861xxxxxxxxx', email='email@xxx.com')
+    >>>         session.commit()
+    >>>     except:
+    >>>         session.rollback()
+    """
+    _old_session = None
+
+    try:
+        _old_session = getattr(_g, 'session', None)
+        _g.session = get_session(master=True)
+        logging.debug('using global master session...')
+        yield _g.session
+        _g.session.commit()
+    except:
+        _g.session.rollback()
+        raise
+    finally:
+        _g.session.close()
+        if _old_session is None:
+            del _g.session
+        else:
+            _g.session = _old_session
+        del _old_session
+        logging.debug('end using global master session...')
