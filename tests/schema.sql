@@ -1,9 +1,123 @@
-CREATE TABLE `user` (
-    `id` bigint(20) NOT NULL AUTO_INCREMENT,
-    `name` varchar(64) NOT NULL COMMENT '用户昵称',
-    `phone_no` varchar(32) NOT NULL COMMENT '',
-    `email` varchar(32) NOT NULL COMMENT '',
-    `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '操作时间',
-    `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+CREATE TABLE `user` ( 
+    `id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT, 
+    `name` VARCHAR(64) NOT NULL COMMENT '用户昵称',
+    `phone_no` VARCHAR(32) NOT NULL COMMENT '',
+    `email` VARCHAR(32) NOT NULL COMMENT '',
+    `type` TINYINT(4) NOT NULL DEFAULT 1 COMMENT '用户类型，1 顾客 2 卖主',
+    `merchant_shop_id` BIGINT(20) UNSIGNED NOT NULL DEFAULT 0 COMMENT '店面 id 默认为 0', 
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '操作时间', 
+    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '用户信息表';
+
+CREATE TABLE `order` (
+    `id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `user_id` BIGINT(20) NOT NULL,
+    `trade_token` VARCHAR(64) DEFAULT '' COMMENT '交易单号',
+    `sales_amount` INT(11) NOT NULL DEFAULT 0 COMMENT '卖价',
+    `pay_amount` INT(11) NOT NULL DEFAULT 0 COMMENT '买价',
+    `status` TINYINT(4) NOT NULL DEFAULT 0 COMMENT '订单状态 0 创建 1 成功 2 失败',
+    `snapshot` TEXT DEFAULT NULL COMMENT 'json 格式，交易快照, 存储图片',
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '操作时间',
+    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `idx_trade_token` (`trade_token`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '订单表';
+
+--  CREATE TABLE `order_item` (
+    --  `id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+    --  `status` TINYINT(4) NOT NULL DEFAULT 0,
+    --  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '操作时间',
+    --  `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    --  PRIMARY KEY (`id`)
+--  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '订单表';
+
+CREATE TABLE `spu` (
+    `id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `name` VARCHAR(512) NOT NULL DEFAULT '' COMMENT 'spu name',
+    `description` VARCHAR(1024) NOT NULL DEFAULT '' COMMENT 'spu 描述',
+    `image_hash` VARCHAR(256) DEFAULT NULL COMMENT '',
+    `url_token` VARCHAR(64) NOT NULL DEFAULT '' COMMENT 'spu uuid',
+    `category_id` INT(16) DEFAULT NULL COMMENT '',
+    `business` TINYINT(4) NOT NULL DEFAULT '0' COMMENT '',
+    `status` TINYINT(4) NOT NULL DEFAULT 0 COMMENT '',
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '操作时间',
+    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `idx_url_token` (`url_token`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '商品 spu 表';
+
+CREATE TABLE `sku` (
+    `id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `spu_id` INT(16) NOT NULL COMMENT '',
+    `business` INT(4) NOT NULL DEFAULT '0' COMMENT '',
+    `image_hash` VARCHAR(256) DEFAULT '' COMMENT 'sku image',
+    `category_id` INT(16) NOT NULL COMMENT '',
+    `name` VARCHAR(512) NOT NULL DEFAULT '' COMMENT '',
+    `description` VARCHAR(1024) NOT NULL DEFAULT '' COMMENT '',
+    `price` INT(11) UNSIGNED NOT NULL DEFAULT '0' COMMENT '',
+    `qrcode_token` VARCHAR(50) NOT NULL DEFAULT '' COMMENT '',
+    `url_token` VARCHAR(64) NOT NULL DEFAULT '',
+    `stock` INT(16) NOT NULL DEFAULT '-1' COMMENT '库存',
+    `unit` VARCHAR(128) NOT NULL COMMENT 'sku 单位，如个、袋等',
+    `storekeeper` INT(16) DEFAULT '0' COMMENT '',
+    `status` TINYINT(4) NOT NULL COMMENT '',
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '',
+    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '',
+    `share_title` VARCHAR(256) NOT NULL DEFAULT '' COMMENT '分享标题',
+    `shelf_up_time` BIGINT(11) NOT NULL DEFAULT '0' COMMENT '上架时间',
+    `shelf_down_time` BIGINT(11) NOT NULL DEFAULT '0' COMMENT '下架时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `idx_token` (`url_token`),
+    KEY `idx_sku_business_status` (`sku_id`,`business`,`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '商品 sku 表';
+
+CREATE TABLE `promotion` (
+    `id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `sku_id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `price` INT(11) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'sku 原价',
+    `is_promotion` TINYINT(4) NOT NULL COMMENT 'sku 是否促销',
+    `promotion_price` INT(11) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'sku 促销价',
+    `start_time` BIGINT(20) UNSIGNED NOT NULL DEFAULT 0 COMMENT '促销起始时间',
+    `end_time` BIGINT(20) UNSIGNED NOT NULL DEFAULT 0 COMMENT '促销结束时间',
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '操作时间', 
+    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '商品 sku 价格表';
+
+--  CREATE TABLE `category` (
+    --  `id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+    --  `name` VARCHAR(128) NOT NULL DEFAULT '' COMMENT '名称',
+    --  `url_token` VARCHAR(64) NOT NULL DEFAULT '' COMMENT '分类 token',
+    --  `parent_id` INT(16) UNSIGNED NOT NULL DEFAULT '0' COMMENT '父分类id，根节点根分类该字段值为0',
+    --  `depth` TINYINT(4) UNSIGNED NOT NULL COMMENT '分类深度，标识自己是几级分类',
+    --  `is_leaf` TINYINT(4) NOT NULL DEFAULT '0' COMMENT '是否是叶子节点0不是1是',
+    --  `order` INT(11) NOT NULL COMMENT '排序',
+    --  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    --  `status` TINYINT(4) NOT NULL DEFAULT '0' COMMENT '0: 草稿, 1: 发放, -1: 删除',
+    --  `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    --  `servicer` VARCHAR(128) NOT NULL DEFAULT '' COMMENT '关联客服',
+    --  `business` SMALLINT(2) NOT NULL DEFAULT '1' COMMENT '业务类型',
+    --  PRIMARY KEY (`id`)
+--  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '商品类目';
+
+CREATE TABLE `merchant` (
+    `id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `name` VARCHAR(512) NOT NULL DEFAULT '' COMMENT '商家名字',
+    `description` VARCHAR(1024) NOT NULL DEFAULT '' COMMENT '商家描述',
+    `status` TINYINT(4) NOT NULL DEFAULT 0 COMMENT '商家状态 0 正常 1 删除',
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '操作时间',
+    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '商店表';
+
+CREATE TABLE `merchant_shop` (
+    `id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `merchant_id` BIGINT(20) UNSIGNED NOT NULL COMMENT '商家表',
+    `name` VARCHAR(512) NOT NULL DEFAULT '' COMMENT '商家店面名字',
+    `description` VARCHAR(1024) NOT NULL DEFAULT '' COMMENT '商家店面描述',
+    `address` TEXT NOT NULL COMMENT '商家店面地址',
+    `status` TINYINT(4) NOT NULL DEFAULT 0,
+    `contact_info` TEXT DEFAULT NULL COMMENT '商家店面联系方式',
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '操作时间',
+    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '商店连锁表';
+
