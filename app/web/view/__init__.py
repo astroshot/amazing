@@ -1,9 +1,9 @@
 # coding=utf-8
 
-from tornado.web import RequestHandler
-from tornado.netutil import is_valid_ip
-from tornado.escape import json_decode, json_encode
 from cached_property import cached_property
+from tornado.escape import json_decode, json_encode
+from tornado.netutil import is_valid_ip
+from tornado.web import RequestHandler
 
 from app.exception import BadRequestException
 
@@ -11,7 +11,7 @@ from app.exception import BadRequestException
 class APIBaseHandler(RequestHandler):
     _MAX_CACHE_SIZE = 10000
     _METHODS = ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH']
-    _SATUS_CODE_REASONS = {
+    _STATUS_CODE_REASONS = {
         422: 'Cannot be processed Entity',
     }
 
@@ -132,3 +132,9 @@ class APIBaseHandler(RequestHandler):
     def render_json(self, data):
         self.set_header('Content-Type', 'application/json')
         self.finish(json_encode(data))
+
+    @property
+    def protocol(self):
+        protocol = self.request.headers.get('X-Forwarded-Proto', '')
+        protocol = protocol.lower()
+        return protocol if protocol == 'https' else 'http'
