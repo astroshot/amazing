@@ -7,3 +7,7 @@ bin: setup.py versions.cfg
 .PHONY: clean
 clean:
 	-rm bin/*
+
+.PHONY: format
+format:
+	autopep8 -ria --max-line-length 120 app

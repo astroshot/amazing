@@ -164,7 +164,7 @@ def using_global_transaction():
         logging.debug('using global master session...')
         yield _g.session
         _g.session.commit()
-    except:
+    except BaseException:
         _g.session.rollback()
         raise
     finally:

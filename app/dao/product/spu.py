@@ -22,7 +22,8 @@ class SpuDAO(DAO):
 
     @classmethod
     @use_session(master=True)
-    def add(cls, name, description, image_hash, url_token, category_id, business, merchant_id=0, status=Status.NORMAL.value):
+    def add(cls, name, description, image_hash, url_token, category_id,
+            business, merchant_id=0, status=Status.NORMAL.value):
         spu = cls(name=name, description=description, image_hash=image_hash, url_token=url_token,
                   category_id=category_id, business=business, merchant_id=merchant_id, status=status)
         cls.session.add(spu)
