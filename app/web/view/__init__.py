@@ -138,3 +138,14 @@ class APIBaseHandler(RequestHandler):
         protocol = self.request.headers.get('X-Forwarded-Proto', '')
         protocol = protocol.lower()
         return protocol if protocol == 'https' else 'http'
+
+
+class AllowCrossDomainHandler(APIBaseHandler):
+
+    def set_default_headers(self):
+        super(AllowCrossDomainHandler, self).set_default_headers()
+        self.set_header('Access-Control-Allow-Origin', self.request.headers.get('Origin', ''))
+        self.set_header('Access-Control-Allow-Methods',
+                        ', '.join(['GET', 'PATCH', 'PUT', 'POST', 'DELETE', 'OPTIONS']))
+        self.set_header("Access-Control-Allow-Headers", self.request.headers.get("access-control-request-headers", ""))
+        self.set_header("Access-Control-Allow-Credentials", "true")
