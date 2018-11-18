@@ -19,6 +19,9 @@ def parse_cmd_params():
 def get_application():
     settings = {
         'gzip': True,
+        'debug': True,
+        'enable_cors': True,
+        'allow_origins': [],
     }
 
     _app = Application(handlers, **settings)
