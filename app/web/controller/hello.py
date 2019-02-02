@@ -1,6 +1,6 @@
 # coding=utf-8
 
-from app.web.view import APIBaseHandler
+from app.web.controller import APIBaseHandler
 
 
 class HelloHandler(APIBaseHandler):
