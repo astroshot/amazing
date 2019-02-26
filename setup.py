@@ -11,7 +11,7 @@ with open(path.join(here, 'README.md')) as f:
     long_description = f.read()
 
 # get the dependencies and installs
-with open(path.join(here, 'requirements.txt')) as f:
+with open(path.join(here, 'requirements.txt'), mode='r') as f:
     requirements = f.read().split('\n')
 
 setup(
