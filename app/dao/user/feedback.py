@@ -1,6 +1,6 @@
 # coding=utf-8
 from sqlalchemy import Column, func
-from sqlalchemy.dialects.mysql import TIMESTAMP, BIGINT, TEXT, INTEGER
+from sqlalchemy.dialects.mysql import TIMESTAMP, BIGINT, TEXT
 
 from app.db import DAO, use_session
 

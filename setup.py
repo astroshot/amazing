@@ -20,7 +20,7 @@ setup(
     license='PRIVATE',
     author='',
     author_email='',
-    description='amazing pay',
+    description='Python3 Web Template',
     url='git@github.com:astroshot/amazing.git',
     packages=find_packages(exclude=['static']),
     zip_safe=False,
