@@ -3,8 +3,8 @@
 from sqlalchemy import Column, func
 from sqlalchemy.dialects.mysql import VARCHAR, TIMESTAMP, BIGINT, TINYINT
 
-from app.db import DAO, use_session
-from app.define import UserType
+from src.db import DAO, use_session
+from src.define import UserType
 
 
 class UserDAO(DAO):

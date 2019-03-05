@@ -9,7 +9,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from tornado.util import ObjectDict
 
-from app.config import db_conf
+from src.config import db_conf
 
 _g = threading.local()
 
@@ -47,7 +47,7 @@ def get_session(master=False, autocommit=False, autoflush=True):
 
 
 def _format_obj_dict(dao, data):
-    from app.db import DAO
+    from src.db import DAO
 
     if not isinstance(dao, type):
         return data
@@ -148,7 +148,7 @@ def using_global_transaction():
     `using_global_transaction` decorator forces `get_session` returns Master `session(master=True)`,
     and ignore config in `use_session`
     used to construct transaction
-    >>> from app.dao.user import UserDAO
+    >>> from src.dao.user import UserDAO
     >>> with using_global_transaction() as session:
     >>>     try:
     >>>         UserDAO.add(name='name', phone_no='+861xxxxxxxxx', email='email@xxx.com')

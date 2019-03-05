@@ -1,13 +1,17 @@
-all: bin
+.PHONY: clean build test format
 
-bin: setup.py versions.cfg
-	-rm -r bin
-	buildout
-
-.PHONY: clean
 clean:
-	-rm bin/*
+	-rm bin/* nosetests.xml coverage.xml .coverage
 
-.PHONY: format
+build:
+	buildout -c buildout.cfg
+	echo 'buildout finished...'
+
+test:
+	bin/test tests
+
 format:
-	autopep8 -ria --max-line-length 120 app
+	autopep8 -ria --max-line-length 120 src script
+
+rebuild: clean build
+	echo 'rebuild finished...'

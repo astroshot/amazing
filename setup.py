@@ -2,7 +2,7 @@
 from os import path
 from setuptools import find_packages, setup
 
-from app import __version__
+from src import __version__
 
 here = path.abspath(path.dirname(__file__))
 
@@ -27,7 +27,7 @@ setup(
     install_requires=[line.strip() for line in requirements if line],
     entry_points={
         'console_scripts': [
-            'amazing_api = app.main:main',
+            'amazing_api = src.main:main',
         ]
     }
 )

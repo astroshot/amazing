@@ -1,7 +1,7 @@
 # coding=utf-8
 import unittest
 
-from app.util.file_util import get_file_extension
+from src.util.file_util import get_file_extension
 
 
 class TestFileUtil(unittest.TestCase):
