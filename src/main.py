@@ -4,7 +4,7 @@ import tornado.httpserver
 from tornado.options import options, define
 from tornado.web import Application
 
-from app.web.urls import handlers
+from src.web.urls import handlers
 
 define('port', default=8000, help='listening port', type=int)
 

@@ -4,7 +4,7 @@ from sqlalchemy import MetaData, func
 from sqlalchemy.ext.declarative import declarative_base
 from tornado.util import ObjectDict
 
-from app.db.session import mysql_master, use_session
+from src.db.session import mysql_master, use_session
 
 _DAO = declarative_base()
 

@@ -5,7 +5,7 @@ from tornado.escape import json_decode, json_encode
 from tornado.netutil import is_valid_ip
 from tornado.web import RequestHandler
 
-from app.exception import BadRequestException
+from src.exception import BadRequestException
 
 
 class APIBaseHandler(RequestHandler):
