@@ -5,7 +5,7 @@ from tornado.escape import json_decode, json_encode
 from tornado.netutil import is_valid_ip
 from tornado.web import RequestHandler
 
-from src.exception import BadRequestException
+from src.exception import APIException, BadRequestException
 
 
 class APIBaseHandler(RequestHandler):
@@ -131,13 +131,55 @@ class APIBaseHandler(RequestHandler):
 
     def render_json(self, data):
         self.set_header('Content-Type', 'application/json')
-        self.finish(json_encode(data))
+        self.finish(json_encode(data).encode('utf-8'))
 
     @property
     def protocol(self):
         protocol = self.request.headers.get('X-Forwarded-Proto', '')
         protocol = protocol.lower()
         return protocol if protocol == 'https' else 'http'
+
+    def send_error(self, status_code=500, **kwargs):
+        """Sends the given HTTP error code to the browser.
+
+        If `flush()` has already been called, it is not possible to send
+        an error, so this method will simply terminate the response.
+        If output has been written but not yet flushed, it will be discarded
+        and replaced with the error page.
+
+        Override `write_error()` to customize the error page that is returned.
+        Additional keyword arguments are passed through to `write_error`.
+        """
+        if self._headers_written:
+            gen_log.error("Cannot send error response after headers written")
+            if not self._finished:
+                # If we get an error between writing headers and finishing,
+                # we are unlikely to be able to finish due to a
+                # Content-Length mismatch. Try anyway to release the
+                # socket.
+                try:
+                    self.finish()
+                except Exception:
+                    print("Failed to flush partial response",
+                                  exc_info=True)
+            return
+        self.clear()
+
+        reason = kwargs.get('reason')
+        if 'exc_info' in kwargs:
+            exception = kwargs['exc_info'][1]
+            if isinstance(exception, APIException) and exception.reason:
+                reason = exception.reason
+        self.set_status(status_code)
+        try:
+            self.render_json({
+                'code': status_code,
+                'info': reason,
+            })
+        except Exception:
+            print("Uncaught exception in write_error", exc_info=True)
+        if not self._finished:
+            self.finish()
 
 
 class AllowCrossDomainHandler(APIBaseHandler):
