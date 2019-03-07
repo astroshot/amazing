@@ -1,35 +1,28 @@
 # coding=utf-8
+from tornado.web import HTTPError
 
 
-class APIException(Exception):
+class APIException(HTTPError):
     """Base Exception for APIs.
     """
 
     ERROR_CODE = None
     STATUS_CODE = 200
 
-    def __init__(self, message, data=None, debug_message=None):
-        if self.ERROR_CODE is None:
-            raise NotImplementedError()
-        self._message = message
-        self._data = dict(data) if data else None
-        self._debug_message = debug_message
+    def __init__(self, info, status_code, log_message=None, **kwargs):
+        self._info = info
+        self.reason = info
+        self.status_code = status_code
+        self.log_message = log_message
+        self._data = dict(kwargs)
 
     @property
-    def code(self):
-        return self.ERROR_CODE
-
-    @property
-    def message(self):
-        return self._message
+    def info(self):
+        return self._info
 
     @property
     def data(self):
         return self._data
-
-    @property
-    def debug_message(self):
-        return self._debug_message
 
 
 class BadRequestException(APIException):
@@ -39,8 +32,8 @@ class BadRequestException(APIException):
     ERROR_CODE = 400
     STATUS_CODE = 400
 
-    def __init__(self, message=u'请求错误', data=None, debug_message=None):
-        super(BadRequestException, self).__init__(message, data, debug_message)
+    def __init__(self, info=u'请求错误', status_code=STATUS_CODE, log_message=None):
+        super(BadRequestException, self).__init__(info, status_code, log_message)
 
 
 class ResourceNotFoundException(APIException):
@@ -50,8 +43,8 @@ class ResourceNotFoundException(APIException):
     ERROR_CODE = 4041
     STATUS_CODE = 404
 
-    def __init__(self, message=u'资源不存在', data=None, debug_message=None):
-        super(ResourceNotFoundException, self).__init__(message, data, debug_message)
+    def __init__(self, info=u'请求错误', status_code=STATUS_CODE, log_message=None):
+        super(ResourceNotFoundException, self).__init__(info, status_code, log_message)
 
 
 class ResourceNotAvailableException(APIException):
@@ -61,5 +54,5 @@ class ResourceNotAvailableException(APIException):
     ERROR_CODE = 107
     STATUS_CODE = 410
 
-    def __init__(self, message=u'资源不可用', data=None, debug_message=None):
-        super(ResourceNotAvailableException, self).__init__(message, data, debug_message)
+    def __init__(self, info=u'请求错误', status_code=STATUS_CODE, log_message=None):
+        super(ResourceNotAvailableException, self).__init__(info, status_code, log_message)
