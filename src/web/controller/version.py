@@ -1,9 +1,9 @@
 # coding=utf-8
 """
 """
+from cached_property import cached_property
 from src.exception import BadRequestException
 from six import string_types
-from tornado.web import HTTPError
 from . import APIBaseHandler
 
 
@@ -16,41 +16,27 @@ class VersionHandler(APIBaseHandler):
     as args[0]
     """
 
-    __versions = ('1.0',)
+    _versions = ('1.0',)
 
     @property
     def version(self):
-        """
+        """Get API version by the order of
+        `uri path param` -> `query param` -> `default version`
 
         :return: if not overwritten, return default version of this Handler
         """
-        version = self.get_query_argument('v')
+        version = getattr(self, 'current_version', None)
+        if version is not None:
+            return version
+
+        version = self.get_query_argument('v', self._versions[0])
         if isinstance(version, string_types):
             return version
-        else:
-            return self.__versions[0]
+        return self._versions[0]
 
-    def get_versions(self):
+    def get_defined_versions(self):
         """
 
         :return: return supported versions of this Handler
         """
-        return self.__versions
-
-    def check_version(self, legal_versions, *args, **kwargs):
-        """Check API version, make sure version in path should be legal in tuple `__versions`
-
-        :param legal_versions:
-        :param args: args passed to subclass handler from uri path
-        :param kwargs:
-        :return:
-        """
-
-        if len(args) < 1:
-            return
-        version = args[0]  # if your path is different, implements your own version check method
-        if version not in legal_versions:
-            raise BadRequestException(info=u'API 版本号错误: {}'.format(version))
-
-    def get(self, *args, **kwargs):
-        self.check_version(*args)
+        return self._versions
