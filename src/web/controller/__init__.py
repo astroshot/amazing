@@ -1,6 +1,7 @@
 # coding=utf-8
 
 from cached_property import cached_property
+from functools import wraps
 from tornado.escape import json_decode, json_encode
 from tornado.netutil import is_valid_ip
 from tornado.web import RequestHandler
@@ -161,7 +162,7 @@ class APIBaseHandler(RequestHandler):
                     self.finish()
                 except Exception:
                     print("Failed to flush partial response",
-                                  exc_info=True)
+                          exc_info=True)
             return
         self.clear()
 
@@ -173,8 +174,9 @@ class APIBaseHandler(RequestHandler):
         self.set_status(status_code)
         try:
             self.render_json({
-                'code': status_code,
+                'code': exception.ERROR_CODE if isinstance(exception, APIException) else -1,
                 'info': reason,
+                'data': exception.data if isinstance(exception, APIException) else None,
             })
         except Exception:
             print("Uncaught exception in write_error", exc_info=True)
@@ -191,3 +193,37 @@ class AllowCrossDomainHandler(APIBaseHandler):
                         ', '.join(['GET', 'PATCH', 'PUT', 'POST', 'DELETE', 'OPTIONS']))
         self.set_header("Access-Control-Allow-Headers", self.request.headers.get("access-control-request-headers", ""))
         self.set_header("Access-Control-Allow-Credentials", "true")
+
+
+def check_api_version(func):
+    """Check API Version of Handler Instance
+    usage: Just decorate it to the method you required. After check, an attribute named as `current_version` is bound
+    to handler with selected version in path.
+
+    :param func: HTTP method implemented by `RequestHandler`
+    :return: func(*args, **kwargs)
+    """
+    _inject_name = 'current_version'
+
+    def decorator(func):
+        @wraps(func)
+        def http_method(*args, **kwargs):
+            argc = len(args)
+            if argc < 1:
+                return func(*args, **kwargs)
+
+            instance = args[0]  # handler instance
+            setattr(instance, _inject_name, None)
+            if argc == 1:  # No uri path arguments
+                return func(*args, **kwargs)
+
+            # if your path is different, get your version in your own way
+            version = args[1]
+            if version not in instance.get_defined_versions():
+                raise BadRequestException(u'错误的 API 版本号: {}'.format(version))
+            setattr(instance, _inject_name, version)
+            return func(*args, **kwargs)
+
+        return http_method
+
+    return decorator(func)
