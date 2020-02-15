@@ -7,9 +7,9 @@ from contextlib import contextmanager
 from functools import wraps
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from tornado.util import ObjectDict
 
 from src.config import db_conf
+from src.util.json_obj import JSONObject
 
 _g = threading.local()
 
@@ -65,7 +65,7 @@ def _format_obj_dict(dao, data):
     elif isinstance(data, list):
         return [_format_obj_dict(dao, item) for item in data]
     elif isinstance(data, dict):
-        return ObjectDict((key, _format_obj_dict(dao, value)) for key, value in data)
+        return JSONObject((key, _format_obj_dict(dao, value)) for key, value in data)
     else:
         return data
 

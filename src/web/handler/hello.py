@@ -1,6 +1,6 @@
 # coding=utf-8
-from src.web.controller import check_api_version
-from src.web.controller.version import VersionHandler
+from src.web.handler import check_api_version
+from src.web.handler.version import VersionHandler
 from src.exception import BadRequestException
 
 

@@ -1,0 +1,6 @@
+[mysql]
+master = "mysql://root@localhost/test?charset=utf8"
+slaves = ["mysql://root@localhost/test?charset=utf8"]
+downtime = 0.5
+echo_sql = true
+longquery_time = 1
