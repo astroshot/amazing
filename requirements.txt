@@ -2,6 +2,8 @@ backcall
 cached-property
 Click
 decorator
+importlib-metadata
+inflect
 ipython
 ipython-genutils
 jedi
@@ -14,9 +16,11 @@ ptyprocess
 Pygments
 simplegeneric
 six
+sqlacodegen
 SQLAlchemy
 toml
 tornado
 traitlets
 wcwidth
 zc.buildout
+zipp

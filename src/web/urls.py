@@ -1,7 +1,8 @@
 # coding=utf-8
-from src.web.controller.echo import EchoHandler
-from src.web.controller.hello import HelloHandler, HelloV2Handler
-from src.web.controller.upload_images import UploadImagesHandler
+from src.web.handler.echo import EchoHandler
+from src.web.handler.hello import HelloHandler, HelloV2Handler
+from src.web.handler.upload_images import UploadImagesHandler
+from src.web.handler.user import UserHandler
 
 handlers = [
     (r'/', HelloHandler),
@@ -10,4 +11,6 @@ handlers = [
     (r'/hello2/(\d+\.\d+)', HelloV2Handler),
     (r'/echo', EchoHandler),
     (r'/images/actions/upload', UploadImagesHandler),
+    (r'/users', UserHandler),
+
 ]

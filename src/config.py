@@ -1,10 +1,12 @@
 # coding=utf-8
-import os
 import toml
 
-PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-config_file = 'config.toml'
+from src.util.singleton import Config
 
 # {'mysql': {'master': 'mysql://root@localhost/test?charset=utf8'}}
-local_config = toml.load(open(os.path.join(PROJECT_ROOT, 'conf', config_file)))
+conf = Config()
+config_file = conf.get('config_file')
+local_config = toml.load(config_file)
 db_conf = local_config['mysql']
+
+print(db_conf)

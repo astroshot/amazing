@@ -1,7 +1,6 @@
 # coding=utf-8
 
-from src.util.file_util import get_file_extension
-from src.web.controller import AllowCrossDomainHandler
+from src.web.handler import AllowCrossDomainHandler
 
 
 class UploadImagesHandler(AllowCrossDomainHandler):

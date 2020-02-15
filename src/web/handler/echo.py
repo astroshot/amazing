@@ -1,5 +1,5 @@
 # coding=utf-8
-from src.web.controller import APIBaseHandler
+from src.web.handler import APIBaseHandler
 
 
 class EchoHandler(APIBaseHandler):
