@@ -1,7 +1,10 @@
 backcall
 cached-property
+certifi
+chardet
 Click
 decorator
+idna
 importlib-metadata
 inflect
 ipython
@@ -13,7 +16,9 @@ pexpect
 pickleshare
 prompt-toolkit
 ptyprocess
+pycrypto
 Pygments
+requests
 simplegeneric
 six
 sqlacodegen
@@ -21,6 +26,7 @@ SQLAlchemy
 toml
 tornado
 traitlets
+urllib3
 wcwidth
 zc.buildout
 zipp
